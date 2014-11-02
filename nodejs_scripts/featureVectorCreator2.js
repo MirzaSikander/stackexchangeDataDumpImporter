@@ -12,48 +12,42 @@ fs.readFile('/Users/mirzasikander/Dropbox/school/CSCI 599/Data Files/TagsGreater
 	//write to a file.
 	var fvfileStream = fs.createWriteStream('/Users/mirzasikander/Dropbox/school/CSCI 599/Data Files/TagFeatureVectors.csv');
 
+	var index = 0;
 	//read in the question posts
-	var qfileStream = fs.createReadStream('/Users/mirzasikander/Dropbox/school/CSCI 599/Data Files/QuestionsWithTags.csv', {
-		encoding: "utf8"
-	});
+	lineReader.eachLine('/Users/mirzasikander/Dropbox/school/CSCI 599/Data Files/QuestionsWithTags.csv', function(line, last) {
+		var fields = line.split(',');
 
-	qfileStream.on('readable', function() {
-		var qData = qfileStream.read();
-		var questions = qData.split('\n');
+		index++;
+		console.log("Processing question number: " + index + " id: " + fields[0]);
 
-		questions.forEach(function(row, index, array) {
-			var fields = row.split(',');
+		var tagString = fields[1];
 
-			console.log("Processing question number: "+index+" id: "+fields[0]);
-			var tagString = fields[1];
+		var regex = new RegExp(/<([^>]+)>/g);
 
-			var regex = new RegExp(/<([^>]+)>/g);
+		tags.forEach(function(tag, index, array) {
+			var found = false;
+			var questionTags;
 
-			tags.forEach(function(tag, index, array) {
-				var found = false;
-				var questionTags;
-				
-				while((questionTags = regex.exec(tagString)) != null){
-					var currentTag = questionTags[1]
+			while ((questionTags = regex.exec(tagString)) != null) {
+				var currentTag = questionTags[1]
 
-					if (currentTag === tag) {
-						found = true;
-						break;
-					}
-				};
-
-				if (found) {
-					fvfileStream.write("1,");
-				} else {
-					fvfileStream.write("0,")
+				if (currentTag === tag) {
+					found = true;
+					break;
 				}
-			})
-		});
+			};
+
+			if (found) {
+				fvfileStream.write("1,");
+			} else {
+				fvfileStream.write("0,")
+			}
+		})
 
 		fvfileStream.write("\n");
-	});
 
-	qfileStream.on('end', function() {
-		fvfileStream.end();
+		if (last) {
+			fvfileStream.end();
+		}
 	});
 });
