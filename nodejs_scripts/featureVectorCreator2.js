@@ -1,5 +1,8 @@
 var fs = require('fs');
-var lineReader = require('line-reader');
+
+var test = function(){
+	console.log("Done Draining");
+}
 
 fs.readFile('/Users/mirzasikander/Dropbox/school/CSCI 599/Data Files/TagsGreaterThan10.csv', {
 	encoding: "utf8"
@@ -10,44 +13,75 @@ fs.readFile('/Users/mirzasikander/Dropbox/school/CSCI 599/Data Files/TagsGreater
 	var tags = data.split('\n');
 
 	//write to a file.
-	var fvfileStream = fs.createWriteStream('/Users/mirzasikander/Dropbox/school/CSCI 599/Data Files/TagFeatureVectors.csv');
+	var fvfileStream = fs.createWriteStream('/Users/mirzasikander/Desktop/TagFeatureVectors.csv');
 
-	var index = 0;
 	//read in the question posts
-	lineReader.eachLine('/Users/mirzasikander/Dropbox/school/CSCI 599/Data Files/QuestionsWithTags.csv', function(line, last) {
-		var fields = line.split(',');
+	var qfileStream = fs.createReadStream('/Users/mirzasikander/Dropbox/school/CSCI 599/Data Files/QuestionsWithTags.csv', {
+		encoding: "utf8"
+	});
 
-		index++;
-		console.log("Processing question number: " + index + " id: " + fields[0]);
+	var partialRow = null;
+	var writable = true;
+	var count = 0;
 
-		var tagString = fields[1];
+	var doRead = function() {
+		var qData = qfileStream.read();
+		var questions = qData.split('\n');
 
-		var regex = new RegExp(/<([^>]+)>/g);
+		if (partialRow != null) {
+			questions[0] = partialRow + questions[0];
+			partialRow = null;
+		}
 
-		tags.forEach(function(tag, index, array) {
-			var found = false;
-			var questionTags;
+		var lastRow = questions[questions.length - 1];
+		if (lastRow.charAt(lastRow.length - 1) != '\n') {
+			partialRow = lastRow;
+			questions.splice(questions.length-1, 1);
+		}
 
-			while ((questionTags = regex.exec(tagString)) != null) {
-				var currentTag = questionTags[1]
+		questions.forEach(function(row, index, array) {
+			count++;
 
-				if (currentTag === tag) {
-					found = true;
-					break;
+			var fields = row.split(',');
+
+			console.log("Processing question number: " + count + " id: " + fields[0]);
+			var tagString = fields[1];
+
+			var regex = new RegExp(/<([^>]+)>/g);
+
+			tags.forEach(function(tag, index, array) {
+				var found = false;
+				var questionTags;
+
+				while ((questionTags = regex.exec(tagString)) != null) {
+					var currentTag = questionTags[1]
+
+					if (currentTag === tag) {
+						found = true;
+						break;
+					}
+				};
+
+				if (found) {
+					writable = fvfileStream.write("1,", "utf8");
+				} else {
+					writable = fvfileStream.write("0,","utf8");
 				}
-			};
-
-			if (found) {
-				fvfileStream.write("1,");
-			} else {
-				fvfileStream.write("0,")
-			}
-		})
+			});
+		});
 
 		fvfileStream.write("\n");
+	}
 
-		if (last) {
-			fvfileStream.end();
+	qfileStream.on('readable', function() {
+		if (writable) {
+			doRead();
+		} else {
+			fvfileStream.once('drain', test);
 		}
+	});
+
+	qfileStream.on('end', function() {
+		fvfileStream.end();
 	});
 });
