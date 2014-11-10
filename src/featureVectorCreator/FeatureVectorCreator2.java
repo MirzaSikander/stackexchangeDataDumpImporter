@@ -15,9 +15,14 @@ import java.util.stream.Stream;
 //Put questions as columns
 public class FeatureVectorCreator2 {
 
+	public static String FeatureVectorFile = "/home/azureuser/data_files/TagFeatureVectors_Horizontal.csv";
+	public static String TagFile = "/home/azureuser/data_files/TagsGreaterThan10.csv";
+	public static String QuestionFile = "/home/azureuser/data_files/QuestionsWithTags.csv";
+//	public static String FeatureVectorFile = "/Users/mirzasikander/Desktop/TagFeatureVectors.csv";
+//	public static String TagFile = "/Users/mirzasikander/Dropbox/school/CSCI 599/Data Files/TagsGreaterThan10.csv";
+//	public static String QuestionFile = "/Users/mirzasikander/Dropbox/school/CSCI 599/Data Files/QuestionsWithTags.csv";
+
 	public static void CreateFeatureVectors(FileOutputStream output) {
-		String TagFile = "~/data_files/TagsGreaterThan10.csv";
-		String QuestionFile = "~/data_files/QuestionsWithTags.csv";
 
 		List<String> tags;
 
@@ -42,21 +47,29 @@ public class FeatureVectorCreator2 {
 				if (fields.length != 2) {
 					throw new RuntimeException("Illegal format " + q);
 				}
-				
+
 				try {
-					output.write(fields[0].getBytes());
+					output.write((fields[0] + ",").getBytes());
 				} catch (Exception e) {
 					e.printStackTrace();
 					throw new RuntimeException("Cannot write further");
 				}
-				
-				System.out.println("Done with headers");
+
 			});
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 
-		for(int i = 0; i< tags.size(); i++){
+		System.out.println("Done with headers");
+
+		try {
+			output.write("\n".getBytes());
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new RuntimeException("Cannot write further");
+		}
+
+		for (int i = 0; i < tags.size(); i++) {
 			int index = i;
 
 			try (Stream<String> questions = Files
@@ -82,7 +95,7 @@ public class FeatureVectorCreator2 {
 					for (String associatedTag : associatedtags) {
 						if (tags.get(index).compareTo(associatedTag) == 0) {
 							try {
-								output.write("1".getBytes());
+								output.write("1,".getBytes());
 								found = true;
 								break;
 							} catch (Exception e) {
@@ -95,22 +108,13 @@ public class FeatureVectorCreator2 {
 
 					if (!found) {
 						try {
-							output.write("0".getBytes());
+							output.write("0,".getBytes());
 						} catch (Exception e) {
 							e.printStackTrace();
 							throw new RuntimeException("Cannot write further");
 						}
 					}
-					
-					//write the comma, making sure that there is no trailing comma.
-					if(index != tags.size()-1){
-						try {
-							output.write(",".getBytes());
-						} catch (Exception e) {
-							e.printStackTrace();
-							throw new RuntimeException("Cannot write further");
-						}
-					}
+
 				});
 
 			} catch (IOException e) {
@@ -124,12 +128,11 @@ public class FeatureVectorCreator2 {
 				throw new RuntimeException("Cannot write further");
 			}
 
-			System.out.println(i+") tag name: " + tags.get(i));
+			System.out.println(i + ") tag name: " + tags.get(i));
 		}
 	}
 
 	public static void main(String[] args) {
-		String FeatureVectorFile = "~/data_files/TagFeatureVectors_Horizontal.csv";
 
 		try (FileOutputStream output = new FileOutputStream(new File(
 				FeatureVectorFile))) {

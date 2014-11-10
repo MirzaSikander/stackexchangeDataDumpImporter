@@ -8,9 +8,12 @@ import java.nio.file.Paths;
 import java.util.stream.Stream;
 
 public class TrailingCommaRemover {
+//		public static String file = "/Users/mirzasikander/Dropbox/school/CSCI 599/Data Files/TagFeatureVectorsWithTagNames.csv";
+//		public static String FeatureVectorFile = "/Users/mirzasikander/Desktop/TagFeatureVectorsWithTagNames2.csv";
+		public static String file = "/home/azureuser/data_files/TagFeatureVectors_Horizontal.csv";
+		public static String FeatureVectorFile = "/home/azureuser/data_files/TagFeatureVectors_Horizontal_2.csv";
 
 	public static void RemoveComma(FileOutputStream output) {
-		String file = "/Users/mirzasikander/Dropbox/school/CSCI 599/Data Files/TagFeatureVectorsWithTagNames.csv";
 
 		try (Stream<String> questions = Files.lines(Paths.get(file))) {
 			questions.forEachOrdered((String q) -> {
@@ -35,7 +38,6 @@ public class TrailingCommaRemover {
 	}
 
 	public static void main(String[] args) {
-		String FeatureVectorFile = "/Users/mirzasikander/Desktop/TagFeatureVectorsWithTagNames2.csv";
 
 		try (FileOutputStream output = new FileOutputStream(new File(
 				FeatureVectorFile))) {
