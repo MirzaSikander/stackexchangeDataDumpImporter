@@ -8,43 +8,56 @@ import java.nio.file.Paths;
 import java.util.stream.Stream;
 
 public class TrailingCommaRemover {
-//		public static String file = "/Users/mirzasikander/Dropbox/school/CSCI 599/Data Files/TagFeatureVectorsWithTagNames.csv";
-//		public static String FeatureVectorFile = "/Users/mirzasikander/Desktop/TagFeatureVectorsWithTagNames2.csv";
-		public static String file = "/home/azureuser/data_files/TagFeatureVectors_Horizontal.csv";
-		public static String FeatureVectorFile = "/home/azureuser/data_files/TagFeatureVectors_Horizontal_2.csv";
+    public static String file;
+    public static String FeatureVectorFile;
 
-	public static void RemoveComma(FileOutputStream output) {
+    public static void RemoveComma(FileOutputStream output) {
 
-		try (Stream<String> questions = Files.lines(Paths.get(file))) {
-			questions.forEachOrdered((String q) -> {
-				
-				char[] charArray = q.toCharArray();
+        try (Stream<String> questions = Files.lines(Paths.get(file))) {
+            questions.forEachOrdered((String q) -> {
 
-				charArray[charArray.length-1] = '\n';
-				
-				try {
-					output.write(String.copyValueOf(charArray).getBytes());
-				} catch (Exception e) {
-					e.printStackTrace();
-					throw new RuntimeException("Cannot write further");
-				}
+                char[] charArray = q.toCharArray();
 
-			});
+                charArray[charArray.length - 1] = '\n';
 
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+                try {
+                    output.write(String.copyValueOf(charArray).getBytes());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    throw new RuntimeException("Cannot write further");
+                }
 
-	}
+            });
 
-	public static void main(String[] args) {
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
-		try (FileOutputStream output = new FileOutputStream(new File(
-				FeatureVectorFile))) {
-			RemoveComma(output);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
+    }
+
+    public static void main(String[] args) throws Exception {
+
+        String inputFile = System.getProperty("inputFile");
+        String outputFile = System.getProperty("outputFile");
+
+        if(inputFile == null){
+            throw new Exception("input file missing: "+inputFile);
+        }
+
+        if(outputFile == null){
+            throw new Exception("output file missing: "+outputFile);
+        }
+
+        file = System.getProperty("user.home") + "/data_files/"+inputFile+".csv";
+
+        FeatureVectorFile = System.getProperty("user.home") + "/data_files/" + outputFile+".csv";
+
+        try (FileOutputStream output = new FileOutputStream(new File(
+                FeatureVectorFile))) {
+            RemoveComma(output);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
 }
