@@ -20,7 +20,7 @@ import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 
-public class Main {
+public class ExportToMysql {
 
     Properties properties = null;
     String serveraddress;
@@ -35,18 +35,18 @@ public class Main {
 
 
     /**
-     * Main Program
+     * ExportToMysql Program
      *
      * @param args
      * @throws IOException
      */
     public static void main(String[] args) throws IOException {
-        Main xmlImporter = new Main();
+        ExportToMysql xmlImporter = new ExportToMysql();
         xmlImporter.importXMLFolder();
         xmlImporter.closeDB();
     }
 
-    public Main() {
+    public ExportToMysql() {
         loadConfig();
         connectDB();
     }
