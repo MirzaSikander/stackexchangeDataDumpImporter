@@ -1,4 +1,4 @@
-package DataManagement;
+package dataCleaning;
 
 /**
  * This is a tool for importing StackOverflow data dump into MySQL database.
@@ -160,6 +160,8 @@ public class ExportToMysql {
                         String str = null;
 
                         if(field.equals("Body"))
+                            str = URLEncoder.encode(result, "UTF-8");
+                        else if(field.equals("Title") && result != null)
                             str = URLEncoder.encode(result, "UTF-8");
                         else
                             str = result;
