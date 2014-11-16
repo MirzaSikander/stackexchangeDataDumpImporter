@@ -1,4 +1,4 @@
-package featureVectorCreator;
+package tagFeatureVectorCreator;
 
 import java.io.File;
 import java.io.FileOutputStream;
