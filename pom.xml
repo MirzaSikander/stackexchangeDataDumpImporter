@@ -7,6 +7,13 @@
     <groupId>599-project</groupId>
     <artifactId>Stackoverflow</artifactId>
     <version>1.0-SNAPSHOT</version>
+    <dependencies>
+        <dependency>
+            <groupId>gov.nist.math</groupId>
+            <artifactId>jama</artifactId>
+            <version>1.0.3</version>
+        </dependency>
+    </dependencies>
     <properties>
         <mainClass></mainClass>
     </properties>
@@ -68,8 +75,8 @@
                 </property>
             </activation>
             <properties>
-                <inputFile></inputFile>
-                <outputFile></outputFile>
+                <inputFile>TagFeatureVectors_Horizontal_2</inputFile>
+                <outputFile>FeatureVector</outputFile>
             </properties>
             <build>
                 <pluginManagement>
