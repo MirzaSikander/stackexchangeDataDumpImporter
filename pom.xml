@@ -75,8 +75,10 @@
                 </property>
             </activation>
             <properties>
-                <inputFile></inputFile>
-                <outputFile></outputFile>
+                <inputFile>TagFeatureVectors_Horizontal_2</inputFile>
+                <outputFileForU>FeatureFileAfterSVD-U</outputFileForU>
+                <outputFileForV>FeatureFileAfterSVD-V</outputFileForV>
+                <outputFileForS>FeatureFileAfterSVD-S</outputFileForS>
             </properties>
             <build>
                 <pluginManagement>
@@ -107,8 +109,16 @@
                                     <value>${inputFile}</value>
                                 </systemProperty>
                                 <systemProperty>
-                                    <key>outputFile</key>
-                                    <value>${outputFile}</value>
+                                    <key>outputFileForU</key>
+                                    <value>${outputFileForU}</value>
+                                </systemProperty>
+                                <systemProperty>
+                                    <key>outputFileForV</key>
+                                    <value>${outputFileForV}</value>
+                                </systemProperty>
+                                <systemProperty>
+                                    <key>outputFileForS</key>
+                                    <value>${outputFileForS}</value>
                                 </systemProperty>
                             </systemProperties>
                         </configuration>
