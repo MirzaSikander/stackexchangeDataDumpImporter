@@ -3,9 +3,6 @@ package dataCleaning;
 import java.io.*;
 import java.util.Random;
 
-/**
- * Created by mirzasikander on 11/16/14.
- */
 public class TrainingTestSetDivider {
 
     public static void main(String args[]) throws Exception {
