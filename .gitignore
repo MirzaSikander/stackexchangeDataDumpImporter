@@ -25,3 +25,5 @@ nbproject/private/
 node_modules/
 
 src/main/java/test/
+
+/logs

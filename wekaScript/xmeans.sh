@@ -1,0 +1,1 @@
+nohup java -Xmx7g -cp ~/weka-3-6-11/weka.jar weka.clusterers.XMeans -t ~/data_files/TagFeatureVectors.arff -I 1000 -M 1000 -J 1000 -L 2 -H 980 -B 1.0 -C 0.5 -D "weka.core.EuclideanDistance -R first-last" -S 800 > xmeans.out 2> xmeans.err &

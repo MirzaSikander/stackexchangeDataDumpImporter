@@ -1,1 +1,1 @@
-java -cp ~/weka-3-6-11/weka.jar weka.core.converters.CSVLoader TagFeatureVectorsWithTagNames.csv > TagFeatureVectors.arff
+java -cp ~/weka-3-6-11/weka.jar weka.core.converters.CSVLoader ~/data_files/TagFeatureVectors_Horizontal_2.csv > ~/data_files/TagFeatureVectors.arff
