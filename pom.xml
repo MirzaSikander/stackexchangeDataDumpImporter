@@ -399,10 +399,6 @@
                                     <value>${trainingSetAttrFile}</value>
                                 </systemProperty>
                                 <systemProperty>
-                                    <key>trainingSetAttrFile</key>
-                                    <value>${trainingSetAttrFile</value>
-                                </systemProperty>
-                                <systemProperty>
                                     <key>trainingSetSvdUFile</key>
                                     <value>${trainingSetSvdUFile}</value>
                                 </systemProperty>
@@ -412,7 +408,7 @@
                                 </systemProperty>
                                 <systemProperty>
                                     <key>trainingSetSvdVFile</key>
-                                    <value>trainingSetSvdVFile}</value>
+                                    <value>${trainingSetSvdVFile}</value>
                                 </systemProperty>
                                 <systemProperty>
                                     <key>testSetAttrFile</key>

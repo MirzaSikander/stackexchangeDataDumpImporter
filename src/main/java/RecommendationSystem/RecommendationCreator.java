@@ -35,35 +35,35 @@ public class RecommendationCreator {
 
 
         if (trainingSetAttrFileName == null) {
-            throw new Exception("training set attributes file missing: " + trainingSetAttrFileName);
+            throw new Exception("training set attributes file missing");
         }
 
         if (trainingSetSvdUFileName == null) {
-            throw new Exception("training set svd U file missing: " + trainingSetSvdUFileName);
+            throw new Exception("training set svd U file missing.");
         }
 
         if (trainingSetSvdSFileName == null) {
-            throw new Exception("training set svd S file missing: " + trainingSetSvdSFileName);
+            throw new Exception("training set svd S file missing.");
         }
 
         if (trainingSetSvdVFileName == null) {
-            throw new Exception("training set svd V file missing: " + trainingSetSvdVFileName);
+            throw new Exception("training set svd V file missing.");
         }
 
         if (maxComponents == null) {
-            throw new Exception("parameter max components is missing");
+            throw new Exception("parameter max components is missing.");
         }
 
         if (testSetAttrFileName == null) {
-            throw new Exception("test set attribute file missing: " + testSetAttrFileName);
+            throw new Exception("test set attribute file missing.");
         }
 
         if (testSetBowFileName == null) {
-            throw new Exception("test set bag of words file missing: " + testSetBowFileName);
+            throw new Exception("test set bag of words file missing.");
         }
 
         if (outputDirectoryName == null) {
-            throw new Exception("output directory missing: " + outputDirectoryName);
+            throw new Exception("output directory missing.");
         }
 
         String trainingSetAttrFilePath = System.getProperty("user.home") + "/data_files/" + trainingSetAttrFileName + ".csv";
@@ -82,7 +82,7 @@ public class RecommendationCreator {
             Files.createDirectory(outputDirectory);
         }
 
-        Map<String, LinkedList<String>> userQuestionsMap = getUserQuestionsAnsweredMap(trainingSetAttrFileName);
+        Map<String, LinkedList<String>> userQuestionsMap = getUserQuestionsAnsweredMap(trainingSetAttrFilePath);
         Matrix singularValuesInverse = getSingularValueMatrixInverse(trainingSetSvdSFilePath, maxComp);
         Matrix termVectors = getTermVectors(trainingSetSvdVFilePath, maxComp);
 
@@ -122,7 +122,7 @@ public class RecommendationCreator {
         }
 
         trainingSetSvdVBr.close();
-        int comp = Math.min(cols, maxComp);
+        int comp = Math.min(maxComp, cols);
         Matrix termVectors = new Matrix(rows, comp);
         trainingSetSvdVBr = new BufferedReader(new FileReader(trainingSetSvdVFilePath));
         int i = 0;
@@ -134,6 +134,8 @@ public class RecommendationCreator {
             for (int j = 0; j < comp; j++) {
                 termVectors.set(i, j, Double.parseDouble(fields[j]));
             }
+
+            i++;
         }
 
         return termVectors;
@@ -171,33 +173,29 @@ public class RecommendationCreator {
 
         BufferedWriter bw = new BufferedWriter(new FileWriter(outputFilePath));
 
-        String currentTestQAttr, currentTestQBow;
+        //Skip the first line
+        String currentTestQAttr = testSetAttrBr.readLine(),
+                currentTestQBow = testSetBowBr.readLine();
 
         while ((currentTestQAttr = testSetAttrBr.readLine()) != null) {
 
             String[] testAttr = currentTestQAttr.split(",");
 
             //Getting tags and other attributes
-            String testQuestionId = testAttr[QUESTION_ID_INDEX];
-            String testQuestionUserIdExpert = testAttr[USER_ID_EXPERTS_INDEX];
             int testQuestionScore = Integer.parseInt(testAttr[SCORE_INDEX]);
-            int testQuestionFavoriteCount = Integer.parseInt(testAttr[FAVORITE_COUNT_INDEX]);
-            String testQuestionViewCount = testAttr[VIEW_COUNT_INDEX];
 
             List<String> testQuestionTags = getTagsList(testAttr[TAGS_INDEX]);
-
 
             //Generating query vector
             currentTestQBow = testSetBowBr.readLine();
 
-            Matrix result = generateQueryVector(currentTestQBow, singularValueInverse, termVectors);
-            double[] queryVector = result.getArray()[0];
-            //TODO: do normalization
-            //queryVector = normalize(queryVector);
-
             if (currentTestQBow == null) {
                 throw new RuntimeException("Somethings wrong. Test bow file mismatch with attributes file");
             }
+
+            Matrix queryVector = generateQueryVector(currentTestQBow, singularValueInverse, termVectors);
+            //TODO: do normalization
+            //queryVector = normalize(queryVector);
 
             BufferedReader trainingSetAttrBr = new BufferedReader(new FileReader(trainingSetAttrFilePath)),
                     trainingSetSvdUBr = new BufferedReader(new FileReader(trainingSetSvdUFilePath));
@@ -221,8 +219,6 @@ public class RecommendationCreator {
                 if(questionsAnsweredId.contains(trainingQuestionId)) {
 
                     //Calculate similarity
-
-
                     currentTrainingQBow = trainingSetSvdUBr.readLine();
 
                     if (currentTrainingQBow == null) {
@@ -233,36 +229,39 @@ public class RecommendationCreator {
 
                     int comp = Math.min(maxComp, values.length);
 
-                    double[] significantValues = new double[comp];
+                    Matrix significantComp = new Matrix(1, comp);
 
                     for (int i = 0; i < comp; i++) {
-                        significantValues[i] = Double.parseDouble(values[i]);
+                        significantComp.set(0, i, Double.parseDouble(values[i]));
                     }
 
                     //TODO: do normalization.
                     //significantValues = normalize(significantValues);
 
-                    double cosineSimilarity = cosineSimilarity(queryVector, significantValues);
+                    double cosineSimilarity = computeSimilarity(queryVector, significantComp);
 
-                    if(cosineSimilarity > similarity){
+                    List<String> trainingQuestionTags = getTagsList(trainingAttr[TAGS_INDEX]);
+                    int commonTagCount = findCommonTagsCount(trainingQuestionTags, testQuestionTags);
 
-                        similarity = cosineSimilarity;
+                    double rank = cosineSimilarity * 2 + commonTagCount;
+
+                    if(rank > similarity){
+
+                        similarity = rank;
                         mostSimilarTrainingQAttr = currentTrainingQAttr;
                     }
                 }
             }
 
-            String[] trainingAttr = mostSimilarTrainingQAttr.split(",");
-            List<String> trainingQuestionTags = getTagsList(trainingAttr[TAGS_INDEX]);
-            int commonTagCount = findCommonTagsCount(trainingQuestionTags, testQuestionTags);
+            if(similarity == -1){
+                continue;
+            }
 
-            double rank = testQuestionScore * (similarity * 2 + commonTagCount);
-
-
-            bw.write(Double.toString(rank));
+            bw.write(Double.toString(similarity));
             bw.write(",");
             bw.write(currentTestQAttr);
-            bw.write(currentTrainingQAttr);
+            bw.write(",");
+            bw.write(mostSimilarTrainingQAttr);
             bw.write("\n");
         }
 
@@ -288,29 +287,10 @@ public class RecommendationCreator {
         return commonTags;
     }
 
-    private static double cosineSimilarity(double[] docVector1, double[] docVector2) {
-
-        double dotProduct = 0.0;
-        double magnitude1 = 0.0;
-        double magnitude2 = 0.0;
-        double cosineSimilarity = 0.0;
-
-        for (int i = 0; i < docVector1.length; i++) //docVector1 and docVector2 must be of same length
-        {
-            dotProduct += docVector1[i] * docVector2[i];  //a.b
-            magnitude1 += Math.pow(docVector1[i], 2);  //(a^2)
-            magnitude2 += Math.pow(docVector2[i], 2); //(b^2)
-        }
-
-        magnitude1 = Math.sqrt(magnitude1);//sqrt(a^2)
-        magnitude2 = Math.sqrt(magnitude2);//sqrt(b^2)
-
-        if (magnitude1 != 0.0 | magnitude2 != 0.0) {
-            cosineSimilarity = dotProduct / (magnitude1 * magnitude2);
-        } else {
-            return 0.0;
-        }
-        return cosineSimilarity;
+    private static double computeSimilarity(Matrix sourceDoc, Matrix targetDoc) {
+        double dotProduct = sourceDoc.arrayTimes(targetDoc).norm1();
+        double eucledianDist = sourceDoc.normF() * targetDoc.normF();
+        return dotProduct / eucledianDist;
     }
 
     private static double[] normalize(double[] vector) {

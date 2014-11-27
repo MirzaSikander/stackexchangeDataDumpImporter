@@ -50,7 +50,8 @@ public class TrainingTestSetDivider {
 
         BufferedReader br = new BufferedReader(new FileReader(inputFile));
 
-        String sCurrentLine;
+        //skip the header.
+        String sCurrentLine = br.readLine();
         int index = 0;
 
         while ((sCurrentLine = br.readLine()) != null) {
@@ -102,7 +103,8 @@ public class TrainingTestSetDivider {
 
         BufferedReader br = new BufferedReader(new FileReader(inputFile));
 
-        String sCurrentLine;
+        //skip the header
+        String sCurrentLine = br.readLine();
 
         while ((sCurrentLine = br.readLine()) != null) {
             count++;
