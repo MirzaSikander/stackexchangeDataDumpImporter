@@ -1,0 +1,67 @@
+package Helper;
+
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.Comparator;
+import java.util.TreeMap;
+
+public class SortFile {
+
+    private String inputFile;
+    private String inputFileName;
+    private int noOfLineInFile;
+    BufferedReader bufferedReader;
+    public static final int USER_ID_EXPERTS_INDEX = 11;
+    public static final int NO_OF_RELEVANT_POSTS = 1000;
+
+    TreeMap<String, String> treeMap = new TreeMap<>(new Comparator() {
+        @Override
+        public int compare(Object o1, Object o2) {
+            if (o1 instanceof String && o2 instanceof String) {
+                double o1_score = Double.parseDouble((String) o1);
+                double o2_score = Double.parseDouble((String) o2);
+
+                return Double.compare(o1_score, o2_score);
+            }
+            else{
+                throw new IllegalArgumentException("parameter not string");
+            }
+        }
+    });
+
+
+    public SortFile(String inputFileName) throws FileNotFoundException {
+        this.inputFileName = inputFileName;
+        this.inputFile = System.getProperty("user.home") + "/data_files/rankingFiles/" + inputFileName;
+        bufferedReader = new BufferedReader(new FileReader(this.inputFile));
+        noOfLineInFile = (int) bufferedReader.lines().count();
+    }
+
+    public void extractFile() throws IOException {
+        bufferedReader = new BufferedReader(new FileReader(this.inputFile));
+        String line;
+        while ((line = bufferedReader.readLine()) != null) {
+            treeMap.put(line.split(",")[0], line);
+        }
+        bufferedReader.close();
+    }
+
+    public int checkForUserMatch() {
+        int count = 0;
+
+        for(int i=0; i< NO_OF_RELEVANT_POSTS; i++){
+            String testQuestion = treeMap.pollFirstEntry().getValue();
+            String userField = testQuestion.split(",")[USER_ID_EXPERTS_INDEX];
+            String[] users = userField.substring(1, userField.length()-1).split(";");
+            for(String user:users){
+                if(user.equals(inputFileName)){
+                    count++;
+                }
+            }
+        }
+        return count;
+    }
+
+}
