@@ -104,8 +104,8 @@ public class RecommendationCreator {
                     outputFilePath,
                     maxComp);
 
-            //TODO: remove this line
-            break;
+//            //TODO: remove this line
+//            break;
         }
     }
 
@@ -243,7 +243,7 @@ public class RecommendationCreator {
                     List<String> trainingQuestionTags = getTagsList(trainingAttr[TAGS_INDEX]);
                     int commonTagCount = findCommonTagsCount(trainingQuestionTags, testQuestionTags);
 
-                    double rank = cosineSimilarity * 2 + commonTagCount;
+                    double rank = cosineSimilarity + 2 * commonTagCount;
 
                     if(rank > similarity){
 

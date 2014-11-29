@@ -45,7 +45,7 @@ public class TransposeMatrixFile {
             String[] fields = sCurrentLine.split(",");
 
             for(int j = 0; j< fields.length; j++){
-               m.set(i, j, Double.parseDouble(fields[j]));
+                m.set(i, j, Double.parseDouble(fields[j]));
             }
 
             i++;
