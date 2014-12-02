@@ -12,6 +12,8 @@ public class Main {
 
         System.out.println();
 
+
+
         for(File file: files){
             SortFile sortFile = new SortFile(directoryPath, file.getName(), noOfRelevantPosts);
             sortFile.extractFile();
